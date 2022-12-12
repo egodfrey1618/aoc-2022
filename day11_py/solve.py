@@ -60,7 +60,7 @@ for line in text:
         monkey_false = int(line.split(" ")[-1])
 
     elif line == "":
-        monkeys.append(Monkey(items, worry_adjust, monkey_check, monkey_true, monkey_false))
+        monkeys.append(Monkey(items, worry_adjust, monkey_check, monkey_true, monkey_false)) # type: ignore
     else:
         assert False
 
