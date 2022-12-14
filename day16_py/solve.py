@@ -129,21 +129,21 @@ best_solution = ([], -1)
 def bfs(state : PartialState):
     global best_solution
     next_vertices = state.possible_next_vertices()
-    if next_vertices == []:
-        solution = state.total_flow_finishing_here()
-        yield (state.path, solution)
-    else:
-        for next_vertex in next_vertices:
-            next_state = state.copy()
-            next_state.add_vertex_exn(next_vertex)
-            for x in bfs(next_state):
-                yield x
+    solution = state.total_flow_finishing_here()
+    yield (state.path, solution)
 
-if False:
-    best_with_just_human = -1
-    for s in bfs(state):
-        best_with_just_human = max(best_with_just_human, s[1])
-    print("Best with just the human, part 1: {}".format(best_with_just_human))
+    for next_vertex in next_vertices:
+        next_state = state.copy()
+        next_state.add_vertex_exn(next_vertex)
+        for x in bfs(next_state):
+            yield x
+
+best_with_just_human = -1
+for s in bfs(state):
+    if best_with_just_human < s[1]:
+        print("New best score (part 1): {}".format(s[1]))
+    best_with_just_human = max(best_with_just_human, s[1])
+print("Best with just the human, part 1: {}".format(best_with_just_human))
 
 # Step 5: The same sort of idea, but with the elephant.
 # This works like so:
@@ -164,13 +164,19 @@ lower_bound = human_solutions[0][1]
 print("Computed all possible paths for the human, now working through them in order...")
 print("Best with just the human, part 2: {}".format(lower_bound))
 
+count = 0
 for (path, score) in human_solutions:
     if score * 2 <= lower_bound:
         # There's no point continuing. W.l.o.g. the human gave us more flow. So break here.
         break
+    count += 1
+
 
     elephant_state = PartialState(ALLOWED_TIME - ELEPHANT_TRAINING_TIME, path)
     elephant_best = max(h[1] for h in bfs(elephant_state))
 
+    if lower_bound < score + elephant_best:
+        print("New best score (part 2): {}".format(score + elephant_best))
     lower_bound = max(lower_bound, score + elephant_best)
 print("Best I got, working with the elephant: {}".format(lower_bound))
+print("I tried {} out of {} possible human paths".format(count, len(human_solutions)))
